@@ -19,9 +19,17 @@ import com.example.unittestjetpack.ViewModelFactory;
 import com.example.unittestjetpack.data.Note;
 import com.example.unittestjetpack.utils.DateHelper;
 
-public class NoteUDActivity extends AppCompatActivity {
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 
-    private EditText edtTitle, edtDescription;
+public class NoteUDActivity extends AppCompatActivity {
+    @BindView(R.id.edt_title)
+    EditText edtTitle;
+    @BindView(R.id.edt_description)
+    EditText edtDescription;
+    @BindView(R.id.btn_submit)
+    Button btnSubmit;
 
     public static final String EXTRA_NOTE = "extra_note";
     public static final String EXTRA_POSITION = "extra_position";
@@ -48,14 +56,17 @@ public class NoteUDActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_note_ud);
+        ButterKnife.bind(this);
 
         noteUDViewModel = obtainViewModel(NoteUDActivity.this);
 
-        edtTitle = findViewById(R.id.edt_title);
-        edtDescription = findViewById(R.id.edt_description);
-        Button btnSubmit = findViewById(R.id.btn_submit);
-
         note = getIntent().getParcelableExtra(EXTRA_NOTE);
+
+        setupContent();
+
+    }
+
+    private void setupContent() {
         if (note != null) {
             position = getIntent().getIntExtra(EXTRA_POSITION, 0);
             isEdit = true;
@@ -80,39 +91,36 @@ public class NoteUDActivity extends AppCompatActivity {
             getSupportActionBar().setTitle(actionBarTitle);
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
-
         btnSubmit.setText(btnTitle);
-        btnSubmit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+    }
 
-                String title = edtTitle.getText().toString().trim();
-                String description = edtDescription.getText().toString().trim();
+    @OnClick(R.id.btn_submit)
+    void onSubmitClicked() {
+        String title = edtTitle.getText().toString().trim();
+        String description = edtDescription.getText().toString().trim();
 
-                if (title.isEmpty()) {
-                    edtTitle.setError(getString(R.string.empty));
-                } else if (description.isEmpty()) {
-                    edtDescription.setError(getString(R.string.empty));
-                } else {
-                    note.setTitle(title);
-                    note.setDesc(description);
+        if (title.isEmpty()) {
+            edtTitle.setError(getString(R.string.empty));
+        } else if (description.isEmpty()) {
+            edtDescription.setError(getString(R.string.empty));
+        } else {
+            note.setTitle(title);
+            note.setDesc(description);
 
-                    Intent intent = new Intent();
-                    intent.putExtra(EXTRA_NOTE, note);
-                    intent.putExtra(EXTRA_POSITION, position);
+            Intent intent = new Intent();
+            intent.putExtra(EXTRA_NOTE, note);
+            intent.putExtra(EXTRA_POSITION, position);
 
-                    if (isEdit) {
-                        noteUDViewModel.update(note);
-                        setResult(RESULT_UPDATE, intent);
-                    } else {
-                        note.setDate(DateHelper.getCurrentDate());
-                        noteUDViewModel.insert(note);
-                        setResult(RESULT_ADD, intent);
-                    }
-                    finish();
-                }
+            if (isEdit) {
+                noteUDViewModel.update(note);
+                setResult(RESULT_UPDATE, intent);
+            } else {
+                note.setDate(DateHelper.getCurrentDate());
+                noteUDViewModel.insert(note);
+                setResult(RESULT_ADD, intent);
             }
-        });
+            finish();
+        }
     }
 
     @NonNull
@@ -166,26 +174,18 @@ public class NoteUDActivity extends AppCompatActivity {
         alertDialogBuilder
                 .setMessage(dialogMessage)
                 .setCancelable(false)
-                .setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        if (isDialogClose) {
-                            finish();
-                        } else {
-                            noteUDViewModel.delete(note);
+                .setPositiveButton(getString(R.string.yes), (dialog, id) -> {
+                    if (!isDialogClose) {
+                        noteUDViewModel.delete(note);
 
-                            Intent intent = new Intent();
-                            intent.putExtra(EXTRA_POSITION, position);
-                            setResult(RESULT_DELETE, intent);
-                            finish();
+                        Intent intent = new Intent();
+                        intent.putExtra(EXTRA_POSITION, position);
+                        setResult(RESULT_DELETE, intent);
 
-                        }
                     }
+                    finish();
                 })
-                .setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.cancel();
-                    }
-                });
+                .setNegativeButton(getString(R.string.no), (dialog, id) -> dialog.cancel());
         AlertDialog alertDialog = alertDialogBuilder.create();
         alertDialog.show();
 

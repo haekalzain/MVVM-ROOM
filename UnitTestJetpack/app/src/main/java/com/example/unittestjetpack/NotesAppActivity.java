@@ -2,7 +2,6 @@ package com.example.unittestjetpack;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -19,8 +18,13 @@ import com.google.android.material.snackbar.Snackbar;
 
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+
 public class NotesAppActivity extends AppCompatActivity {
-    private RecyclerView recyclerView;
+    @BindView(R.id.rv_notes)
+    RecyclerView rvNotes;
 
     private NoteAdapter adapter;
 
@@ -28,27 +32,16 @@ public class NotesAppActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_notes_app);
+        ButterKnife.bind(this);
 
         NotesAppViewModel mainViewModel = obtainViewModel(NotesAppActivity.this);
         mainViewModel.getAllNotes().observe(this, noteObserver);
 
         adapter = new NoteAdapter(NotesAppActivity.this);
 
-        recyclerView = findViewById(R.id.rv_notes);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setHasFixedSize(true);
-        recyclerView.setAdapter(adapter);
-
-        FloatingActionButton fabAdd = findViewById(R.id.fab_add);
-        fabAdd.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (view.getId() == R.id.fab_add) {
-                    Intent intent = new Intent(getApplicationContext(), NoteUDActivity.class);
-                    startActivityForResult(intent, NoteUDActivity.REQUEST_ADD);
-                }
-            }
-        });
+        rvNotes.setLayoutManager(new LinearLayoutManager(this));
+        rvNotes.setHasFixedSize(true);
+        rvNotes.setAdapter(adapter);
     }
 
     private final Observer<List<Note>> noteObserver = new Observer<List<Note>>() {
@@ -66,7 +59,7 @@ public class NotesAppActivity extends AppCompatActivity {
     }
 
     private void showSnackbarMessage(String message) {
-        Snackbar.make(recyclerView, message, Snackbar.LENGTH_SHORT).show();
+        Snackbar.make(rvNotes, message, Snackbar.LENGTH_SHORT).show();
     }
 
     @Override
@@ -85,5 +78,11 @@ public class NotesAppActivity extends AppCompatActivity {
                 }
             }
         }
+    }
+
+    @OnClick(R.id.fab_add)
+    void onClickStart() {
+        Intent intent = new Intent(getApplicationContext(), NoteUDActivity.class);
+        startActivityForResult(intent, NoteUDActivity.REQUEST_ADD);
     }
 }
