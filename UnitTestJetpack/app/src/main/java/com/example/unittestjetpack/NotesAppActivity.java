@@ -35,6 +35,7 @@ public class NotesAppActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         NotesAppViewModel mainViewModel = obtainViewModel(NotesAppActivity.this);
+
         mainViewModel.getAllNotes().observe(this, noteObserver);
 
         adapter = new NoteAdapter(NotesAppActivity.this);

@@ -49,21 +49,14 @@ public class NoteUDActivity extends AppCompatActivity {
 
     private NoteUDViewModel noteUDViewModel;
 
-    private String actionBarTitle;
-    private String btnTitle;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_note_ud);
         ButterKnife.bind(this);
-
         noteUDViewModel = obtainViewModel(NoteUDActivity.this);
-
         note = getIntent().getParcelableExtra(EXTRA_NOTE);
-
         setupContent();
-
     }
 
     private void setupContent() {
@@ -74,6 +67,8 @@ public class NoteUDActivity extends AppCompatActivity {
             note = new Note();
         }
 
+        String actionBarTitle;
+        String btnTitle;
         if (isEdit) {
             actionBarTitle = getString(R.string.change);
             btnTitle = getString(R.string.update);
@@ -112,6 +107,7 @@ public class NoteUDActivity extends AppCompatActivity {
             intent.putExtra(EXTRA_POSITION, position);
 
             if (isEdit) {
+                note.setDate(DateHelper.getCurrentDate());
                 noteUDViewModel.update(note);
                 setResult(RESULT_UPDATE, intent);
             } else {
